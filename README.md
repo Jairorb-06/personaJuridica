@@ -1,1 +1,1 @@
-# consultaPersonaJuridica
+# personaJuridica
