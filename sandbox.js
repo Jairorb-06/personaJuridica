@@ -34,7 +34,7 @@ window.addEventListener("message", async function(event) {
     // console.log("length history",  historialTramites.length > 0)
     const firestore = firebase.firestore();
 
-   const informacionCollection = await firestore.collection("ubicabilidad").get();
+   const informacionCollection = await firestore.collection("juridicas").get();
    let placaEncontradaInformacion = false;
   informacionCollection.forEach((doc) => {
     const datos = doc.data();
@@ -48,7 +48,7 @@ window.addEventListener("message", async function(event) {
       // Enviar a Firestore   
       console.log("placa", placa)
       if (Object.keys(informacionPersona).length > 0 && placa !== undefined ) {
-          const respuestasCollection = firestore.collection("ubicabilidad");
+          const respuestasCollection = firestore.collection("juridicas");
           respuestasCollection.add({
             informacionPersona: informacionPersona,
             datosUbicacion: datosUbicacion,
@@ -86,7 +86,7 @@ async function fetchData() {
       console.log(columnData);
       if (Array.isArray(columnData)) {
         for (const plate of columnData) {
-          const informacionCollection = firestore.collection("informacion");
+          const informacionCollection = firestore.collection("test2");
           const informacionQuery = await informacionCollection
             .where("datosBasicos.Placa", "==", plate)
             .get();

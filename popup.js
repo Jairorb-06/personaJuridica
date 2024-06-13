@@ -130,7 +130,7 @@ window.addEventListener("message", function (event) {
               window.frames[0].postMessage(JSON.stringify(datosUbicabilidad), "*");
             });
 
-            chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+            /* chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
               if (message.currentIndex !== undefined) {
                 currentIndex = message.currentIndex;
                 console.log("currentIndex inc", currentIndex)
@@ -143,7 +143,7 @@ window.addEventListener("message", function (event) {
                 }
 
               }
-            });
+            }); */
 
           }
         );
