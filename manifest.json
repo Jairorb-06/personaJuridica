@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Consulta Ubicabilidad",
+  "name": "Persona Juridica",
   "version": "1.0",
-  "description": "Una extensión que automatiza la consulta de ubicabilidad por propietarios.",
+  "description": "Una extensión que automatiza la consulta de ubicabilidad por personas juridicas.",
   "permissions": ["activeTab", "scripting", "identity", "tabs"],
   "action": {
     "default_popup": "popup.html"
