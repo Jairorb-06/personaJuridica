@@ -36,56 +36,84 @@ window.addEventListener("message", function (event) {
                   const botonBuscar = document.querySelector('#consultarPersonaJuridica\\:btnconsultarPersonaJuridica');
                   if (botonBuscar) {
                     botonBuscar.click();
-                    setTimeout(() => {
-                      var panelBody = document.querySelector('.panel-body');
-                      var informacionPersona = {};
-                      var filas = panelBody.querySelectorAll('.row');
-                      filas.forEach(function (fila) {
-                        var columnas = fila.querySelectorAll('.col-xs-3, .col-md-3, .ng-binding');
-                        if (columnas.length >= 4) {
-                          for (var i = 0; i < columnas.length; i += 2) {
-                            var etiqueta = columnas[i].textContent.trim().replace(':', ''); 
-                            var valor = columnas[i + 1].textContent.trim();
-                            informacionPersona[etiqueta] = valor;
-                          }
-                        }
-                      });
-                      console.log("info persona", informacionPersona);
-
-                      var tablaDirecciones = document.querySelector('.tablaAjustada');
-                      var datosDirecciones = [];
-
-                      if (tablaDirecciones) {
-                        var filasDirecciones = tablaDirecciones.querySelectorAll('tbody tr');
-                        if (filasDirecciones.length > 0) {
-                          var encabezadoDirecciones = tablaDirecciones.querySelectorAll('thead th');
-                          var nombresColumnasDirecciones = Array.from(encabezadoDirecciones).map(columna => columna.textContent.trim());
-
-                          filasDirecciones.forEach(function (fila) {
-                            var celdasDirecciones = fila.querySelectorAll('td');
-                            if (celdasDirecciones.length > 0) {
-                              var filaDatosDirecciones = {};
-                              celdasDirecciones.forEach(function (celda, index) {
-                                filaDatosDirecciones[nombresColumnasDirecciones[index]] = celda.textContent.trim();
-                              });
-                              datosDirecciones.push(filaDatosDirecciones);
+                    //console.log("boton buscar presionado")
+                   setTimeout(() => {
+                    var datosPersonaJuridica = {};
+                    var tablaDatosPersonaJuridica = document.querySelector('#consultarPersonaJuridica\\:pGridContentInputColumns');
+                    if (tablaDatosPersonaJuridica) {
+                        var filasPersonaJuridica = tablaDatosPersonaJuridica.querySelectorAll('tbody tr');
+                        filasPersonaJuridica.forEach(function (fila) {
+                            var columnas = fila.querySelectorAll('td');
+                            if (columnas.length >= 4) {
+                                var etiqueta1 = columnas[0].textContent.trim().replace(':', '');
+                                var valor1 = columnas[1].textContent.trim();
+                                var etiqueta2 = columnas[2].textContent.trim().replace(':', '');
+                                var valor2 = columnas[3].textContent.trim();
+                                datosPersonaJuridica[etiqueta1] = valor1;
+                                datosPersonaJuridica[etiqueta2] = valor2;
                             }
-                          });
-                        } else {
-                          console.log('No se encontraron direcciones registradas para la persona consultada.');
-                        }
-                      }
-                      console.log('Datos Direcciones:', datosDirecciones);
-                      if (Object.keys(informacionPersona).length > 0 && datosDirecciones.length > 0) {
+                        });
+                    }
+                    console.log('Datos Persona Jurídica:', datosPersonaJuridica);
+                    
+
+                    var datosDireccion = {};
+                    var tablaDatosDireccion = document.querySelector('#consultarPersonaJuridica\\:pGridContentInputColumns2');
+                    if (tablaDatosDireccion) {
+                        var filasDireccion = tablaDatosDireccion.querySelectorAll('tbody tr');
+                        filasDireccion.forEach(function (fila) {
+                            var columnas = fila.querySelectorAll('td');
+                            if (columnas.length >= 4) {
+                                var etiqueta1 = columnas[0].textContent.trim().replace(':', '');
+                                var valor1 = columnas[1].textContent.trim();
+                                var etiqueta2 = columnas[2].textContent.trim().replace(':', '');
+                                var valor2 = columnas[3].textContent.trim();
+                                datosDireccion[etiqueta1] = valor1;
+                                datosDireccion[etiqueta2] = valor2;
+                            }
+                        });
+                    }
+                    console.log('Datos Dirección:', datosDireccion);
+                    
+
+                    var datosRepresentante = [];
+                    var tablaRepresentante = document.querySelector('#consultarPersonaJuridica\\:pagedTableRepresentantes');
+                    if (tablaRepresentante) {
+                        var filasRepresentante = tablaRepresentante.querySelectorAll('tbody tr');
+                        filasRepresentante.forEach(function (fila) {
+                            var columnas = fila.querySelectorAll('td');
+                            if (columnas.length >= 3) {
+                                var tipoDocumento = columnas[0].textContent.trim();
+                                var numeroDocumento = columnas[1].textContent.trim();
+                                var fechaInicioRepresentacion = columnas[2].textContent.trim();
+                                
+                                var representante = {
+                                    'Tipo documento': tipoDocumento,
+                                    'Nro. documento': numeroDocumento,
+                                    'Fecha inicio representación': fechaInicioRepresentacion
+                                };
+                                
+                                datosRepresentante.push(representante);
+                            }
+                        });
+                    }
+                    console.log('Datos Representante:', datosRepresentante);
+
+
+
+
+                      if (Object.keys(datosPersonaJuridica).length > 0 && datosDireccion.length > 0) {
                         chrome.runtime.sendMessage({
-                          informacionPersona: informacionPersona,
-                          datosDirecciones: datosDirecciones,
-                          placa: placa
+                          datosPersonaJuridica: datosPersonaJuridica,
+                          datosDirecciones: datosDireccion,
+                          datosRepresentante: datosRepresentante,
+                          placa: placa,
+                          currentIndex: currentIndex
                         });
                       }
-                    }, 5000)
+                    }, 3000)
 
-                    chrome.runtime.sendMessage({ currentIndex: currentIndex });
+                    //chrome.runtime.sendMessage({ currentIndex: currentIndex });
                   };
 
                 } else {
@@ -123,9 +151,14 @@ window.addEventListener("message", function (event) {
 
             chrome.runtime.onMessage.addListener(function (message) {
               const datosUbicabilidad = {
-                informacionPersona: message.informacionPersona,
-                datosDirecciones: message.datosDirecciones,
-                placa: message.placa
+                //informacionPersona: message.informacionPersona,
+                //datosDirecciones: message.datosDirecciones,
+                //placa: message.placa
+                datosPersonaJuridica: message.datosPersonaJuridica,
+                datosDirecciones: message.datosDireccion,
+                datosRepresentante: message.datosRepresentante,
+                placa: message.placa,
+                currentIndex: message.currentIndex
               };
               window.frames[0].postMessage(JSON.stringify(datosUbicabilidad), "*");
             });

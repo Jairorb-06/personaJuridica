@@ -18,10 +18,16 @@ window.addEventListener("message", async function(event) {
     const datos = JSON.parse(event.data);
 
     // Acceder a cada objeto por separado
-    const informacionPersona = datos.informacionPersona || {};
-    const datosUbicacion = datos.datosDirecciones || {};
+    //const informacionPersona = datos.informacionPersona || {};
+    //const datosUbicacion = datos.datosDirecciones || {};
     
-    const placa = datos.placa 
+    //const placa = datos.placa 
+
+    const datosPersonaJuridica= datos.datosPersonaJuridica|| {};
+    const datosDirecciones= datos.datosDireccion|| {};
+    const datosRepresentante= datos.datosRepresentante|| {};
+    const placa= datos.placa
+    const currentIndex= datos.currentIndex
     /* 
     if (placa !== undefined) {
       placaActual = placa;
@@ -47,12 +53,14 @@ window.addEventListener("message", async function(event) {
      if (!placaEncontradaInformacion){
       // Enviar a Firestore   
       console.log("placa", placa)
-      if (Object.keys(informacionPersona).length > 0 && placa !== undefined ) {
+      if (Object.keys(datosPersonaJuridica).length > 0 && placa !== undefined ) {
           const respuestasCollection = firestore.collection("juridicas");
           respuestasCollection.add({
-            informacionPersona: informacionPersona,
-            datosUbicacion: datosUbicacion,
-            placa: placa,
+            datosPersonaJuridica: datosPersonaJuridica,
+            datosDirecciones: datosDirecciones,
+            datosRepresentante: datosRepresentante,
+            placa: placa, 
+            currentIndex : currentIndex,
           })
           .then((docRef) => {
             console.log("Respuesta guardada en Firestore con ID:", docRef.id);
