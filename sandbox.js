@@ -18,66 +18,61 @@ window.addEventListener("message", async function(event) {
     const datos = JSON.parse(event.data);
 
     // Acceder a cada objeto por separado
-    //const informacionPersona = datos.informacionPersona || {};
-    //const datosUbicacion = datos.datosDirecciones || {};
-    
-    //const placa = datos.placa 
+    const datosPersonaJuridica = datos.datosPersonaJuridica || {};
+    const datosDireccion = datos.datosDireccion || {};
+    const datosRepresentante = datos.datosRepresentante || {};
+    const placa = datos.placa;
+    const currentIndex = datos.currentIndex;
 
-    const datosPersonaJuridica= datos.datosPersonaJuridica|| {};
-    const datosDirecciones= datos.datosDireccion|| {};
-    const datosRepresentante= datos.datosRepresentante|| {};
-    const placa= datos.placa
-    const currentIndex= datos.currentIndex
-    /* 
-    if (placa !== undefined) {
-      placaActual = placa;
-      //console.log("Nuevo valor de placa:", placaActual);
-    } else {
-      console.log("se conserva el valor actual:", placaActual);
-    } */
-
-    // console.log("length", Object.keys(datosBasicos).length )
-    // console.log("length history",  historialTramites.length > 0)
-    const firestore = firebase.firestore();
-
-   const informacionCollection = await firestore.collection("juridicas").get();
-   let placaEncontradaInformacion = false;
-  informacionCollection.forEach((doc) => {
-    const datos = doc.data();
-    if (datos.placa === placa) {
-      placaEncontradaInformacion = true;
-    }
-  });
-  console.log("placaEncontradaInformacion", placaEncontradaInformacion) 
-   
-     if (!placaEncontradaInformacion){
-      // Enviar a Firestore   
-      console.log("placa", placa)
-      if (Object.keys(datosPersonaJuridica).length > 0 && placa !== undefined ) {
-          const respuestasCollection = firestore.collection("juridicas");
-          respuestasCollection.add({
-            datosPersonaJuridica: datosPersonaJuridica,
-            datosDirecciones: datosDirecciones,
-            datosRepresentante: datosRepresentante,
-            placa: placa, 
-            currentIndex : currentIndex,
-          })
-          .then((docRef) => {
-            console.log("Respuesta guardada en Firestore con ID:", docRef.id);
-          })
-          .catch((error) => {
-            console.error("Error al guardar la respuesta en Firestore:", error);
-          });
+    // Limpiar campos vacíos
+    function limpiarCamposVacios(obj) {
+      const resultado = {};
+      for (const key in obj) {
+        if (obj[key] !== "") {
+          resultado[key] = obj[key];
+        }
       }
-     }else{
-      console.log("placa ya consultada!")
-    } 
+      return resultado;
+    }
 
-    
+    const datosPersonaJuridicaLimpios = limpiarCamposVacios(datosPersonaJuridica);
+    const datosDireccionLimpios = limpiarCamposVacios(datosDireccion);
+    const datosRepresentanteLimpios = limpiarCamposVacios(datosRepresentante);
+
+    const firestore = firebase.firestore();
+    const docRef = firestore.collection("juridicas").doc(placa);
+
+    // Transacción para verificar existencia y actualizar o agregar documento
+    await firestore.runTransaction(async (transaction) => {
+      const doc = await transaction.get(docRef);
+
+      if (!doc.exists) {
+        // Si el documento no existe, agregar uno nuevo
+        transaction.set(docRef, {
+          datosPersonaJuridica: datosPersonaJuridicaLimpios,
+          datosDireccion: datosDireccionLimpios,
+          datosRepresentante: datosRepresentanteLimpios,
+          placa: placa,
+          currentIndex: currentIndex,
+        });
+        console.log("Documento nuevo guardado en Firestore con placa:", placa);
+      } else {
+        // Si el documento existe, actualizarlo
+        transaction.update(docRef, {
+          datosPersonaJuridica: datosPersonaJuridicaLimpios,
+          datosDireccion: datosDireccionLimpios,
+          datosRepresentante: datosRepresentanteLimpios,
+          currentIndex: currentIndex,
+        });
+        console.log("Documento existente actualizado en Firestore con placa:", placa);
+      }
+    });
+
   } catch (error) {
     console.error("Error al analizar el mensaje JSON:", error);
-  }  
+  }
 });
+
 
 
 async function fetchData() {
