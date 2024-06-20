@@ -158,7 +158,7 @@ window.addEventListener("message", function (event) {
         if (startAutomationButton) {
           setTimeout(() => {
             startAutomationButton.click();
-          }, 3000);
+          },700);
         }
       }
     });
