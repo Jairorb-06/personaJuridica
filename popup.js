@@ -146,6 +146,9 @@ window.addEventListener("message", function (event) {
         placa: message.placa,
         currentIndex: message.currentIndex
       };
+      if(message.finalizado){
+        alert("Automatización completada!")
+      }
       window.frames[0].postMessage(JSON.stringify(datosUbicabilidad), "*");
     });
 
