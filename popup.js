@@ -1,9 +1,10 @@
-let currentIndex = 0;
-
 window.addEventListener("message", function (event) {
   if (event.data.allDatosPropietario) {
     const datosPropietario = event.data.allDatosPropietario;
-    
+   // let currentIndex = 0;
+   let currentIndex = event.data.indiceUbicabilidad;
+   let indiceConsulta = 0;
+
     const startButton = document.getElementById("startAutomation");
     if (startButton) {
       // Remover event listener previo si existe
@@ -17,16 +18,20 @@ window.addEventListener("message", function (event) {
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.scripting.executeScript({
           target: { tabId: tabs[0].id },
-          function: (datosPropietario, currentIndex) => {
+          function: (datosPropietario, currentIndex, indiceConsulta) => {
             const propietarios = datosPropietario;
 
             const tipoDocumentoSelect = document.querySelector('#consultarPersonaJuridica\\:personaTipoDocumentos');
             const numeroDocumentoInput = document.querySelector('#consultarPersonaJuridica\\:personaNumeroDocumentos');
 
-            if (currentIndex >= 0 && currentIndex < propietarios.length) {
-              const tipoDocumento = propietarios[currentIndex]['Tipo documento'];
-              const numeroDocumento = propietarios[currentIndex]['Nro. documento'];
-              const placa = propietarios[currentIndex]['placa'];
+            if (currentIndex >= 0 && indiceConsulta>=0 && indiceConsulta < propietarios.length) {
+              //const tipoDocumento = propietarios[indiceConsulta]['Tipo documento'];
+              //const numeroDocumento = propietarios[indiceConsulta]['Nro. documento'];
+              //const placa = propietarios[currentIndex]['placa'];
+
+              const tipoDocumento = propietarios[indiceConsulta]["Tipo documento"] || propietarios[indiceConsulta]["tipoDocumentoPropietario"];
+              const numeroDocumento = propietarios[indiceConsulta]["Nro. documento"] || propietarios[indiceConsulta]["nroDocumentoPropietario"];
+              const placa = propietarios[indiceConsulta]["placa"];
 
               seleccionarOpcionSelect(tipoDocumentoSelect, tipoDocumento);
               simularEvento(tipoDocumentoSelect, 'change');
@@ -34,6 +39,7 @@ window.addEventListener("message", function (event) {
               numeroDocumentoInput.value = numeroDocumento.replace(/\./g, '');
               simularEvento(numeroDocumentoInput, 'input');
               currentIndex++;
+              indiceConsulta++;
 
               const botonBuscar = document.querySelector('#consultarPersonaJuridica\\:btnconsultarPersonaJuridica');
               if (botonBuscar) {
@@ -99,12 +105,14 @@ window.addEventListener("message", function (event) {
                     datosDireccion: datosDireccion,
                     datosRepresentante: datosRepresentante,
                     placa: placa,
-                    currentIndex: currentIndex
+                    currentIndex: currentIndex,
+                    indiceConsulta: indiceConsulta,
                   });
                 }
               }
             } else {
               console.log("consulta finalizada!");
+              chrome.runtime.sendMessage({ finalizado: "consulta finalizada" });
             }
 
             function seleccionarOpcionSelect(select, tipoDocumento) {
@@ -133,7 +141,7 @@ window.addEventListener("message", function (event) {
             }
 
           },
-          args: [datosPropietario, currentIndex],
+          args: [datosPropietario, currentIndex, indiceConsulta],
         });
       });
     }
@@ -144,7 +152,8 @@ window.addEventListener("message", function (event) {
         datosDireccion: message.datosDireccion,
         datosRepresentante: message.datosRepresentante,
         placa: message.placa,
-        currentIndex: message.currentIndex
+        currentIndex: message.currentIndex,
+        indiceConsulta: message.indiceConsulta
       };
       if(message.finalizado){
         alert("Automatización completada!")
@@ -155,6 +164,7 @@ window.addEventListener("message", function (event) {
     chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       if (message.currentIndex !== undefined) {
         currentIndex = message.currentIndex;
+        indiceConsulta= message.indiceConsulta;
         console.log("currentIndex inc", currentIndex);
         const startAutomationButton = document.getElementById("startAutomation");
 

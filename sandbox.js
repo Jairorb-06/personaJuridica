@@ -149,7 +149,7 @@ async function fetchData() {
     let columnData = [];
     let indiceUbicabilidad = 0;
     let docData = null;
-    let docIdUsed = null;
+    //let docIdUsed = null;
 
     // Recorre los documentos en el orden especificado
     for (const docId of documentIds) {
